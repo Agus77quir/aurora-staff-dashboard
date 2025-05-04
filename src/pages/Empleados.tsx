@@ -1,14 +1,14 @@
 
 import React from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import EstadisticasPanel from "@/components/dashboard/EstadisticasPanel";
+import EmpleadosList from "@/components/empleados/EmpleadosList";
 
-const Index = () => {
+const Empleados = () => {
   return (
     <DashboardLayout>
-      <EstadisticasPanel />
+      <EmpleadosList />
     </DashboardLayout>
   );
 };
 
-export default Index;
+export default Empleados;

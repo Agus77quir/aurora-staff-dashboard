@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -24,6 +25,13 @@ export default {
 				ring: 'hsl(var(--ring))',
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+				aurora: {
+					purple: '#9b87f5',
+					blue: '#0EA5E9',
+					darkblue: '#1A1F2C',
+					green: '#33C3F0',
+					teal: '#0EA5E9',
+				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
 					foreground: 'hsl(var(--primary-foreground))'
@@ -84,11 +92,26 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(10px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out'
+			},
+			backgroundImage: {
+				'aurora-gradient': 'linear-gradient(135deg, #1A1F2C 0%, #33C3F0 50%, #9b87f5 100%)',
+				'card-gradient': 'linear-gradient(135deg, rgba(26, 31, 44, 0.8) 0%, rgba(51, 195, 240, 0.2) 100%)',
 			}
 		}
 	},
