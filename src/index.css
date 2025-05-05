@@ -78,6 +78,11 @@
     @apply bg-black/30 backdrop-blur-lg border border-white/10 rounded-xl;
   }
   
+  .aurora-glass {
+    @apply backdrop-blur-lg bg-gradient-to-br from-purple-900/40 via-blue-800/30 to-teal-800/30 border-white/10;
+    box-shadow: 0 0 20px rgba(155, 135, 245, 0.15), 0 0 40px rgba(14, 165, 233, 0.1);
+  }
+  
   .aurora-gradient {
     @apply bg-aurora-gradient;
   }
@@ -88,5 +93,43 @@
   
   .text-gradient {
     @apply bg-gradient-to-r from-aurora-blue to-aurora-purple bg-clip-text text-transparent;
+  }
+  
+  /* Aurora light effect */
+  .aurora-glow {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .aurora-glow::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(155, 135, 245, 0.1) 0%,
+      rgba(14, 165, 233, 0.08) 25%,
+      rgba(51, 195, 240, 0.05) 50%,
+      transparent 75%
+    );
+    animation: aurora-rotate 15s linear infinite;
+    z-index: -1;
+  }
+  
+  @keyframes aurora-rotate {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .aurora-text {
+    @apply font-semibold;
+    text-shadow: 0 0 10px rgba(155, 135, 245, 0.8), 0 0 20px rgba(14, 165, 233, 0.5);
   }
 }

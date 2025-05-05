@@ -6,8 +6,8 @@ import EmpleadoForm from "@/components/empleados/EmpleadoForm";
 const NuevoEmpleado = () => {
   return (
     <DashboardLayout>
-      <div>
-        <h2 className="text-3xl font-bold mb-6">Crear Nuevo Empleado</h2>
+      <div className="aurora-glow">
+        <h2 className="text-3xl font-bold mb-6 aurora-text">Crear Nuevo Empleado</h2>
         <EmpleadoForm tipo="crear" />
       </div>
     </DashboardLayout>

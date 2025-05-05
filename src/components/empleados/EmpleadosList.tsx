@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Trash2, DollarSign, EuroIcon } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +16,8 @@ interface Empleado {
   departamento: string;
   fecha_contratacion: string;
   salario?: string;
+  tipo_salario?: "mensual" | "anual";
+  moneda?: "ARS" | "USD";
   telefono?: string;
   user_id?: string;
   created_at?: string;
@@ -41,6 +44,8 @@ const EmpleadosList = () => {
           const empleadosWithStringProperties: Empleado[] = data.map(item => ({
             ...item,
             salario: item.salario?.toString() || "",
+            tipo_salario: item.tipo_salario || "mensual",
+            moneda: item.moneda || "ARS",
           }));
           
           setEmpleados(empleadosWithStringProperties);
@@ -79,61 +84,83 @@ const EmpleadosList = () => {
       }
     }
   };
+  
+  const formatoSalario = (empleado: Empleado) => {
+    if (!empleado.salario) return "N/A";
+    
+    const monedaSymbol = empleado.moneda === "USD" ? "$" : "ARS $";
+    const tipo = empleado.tipo_salario === "mensual" ? "/mes" : "/año";
+    
+    return `${monedaSymbol}${empleado.salario}${tipo}`;
+  };
 
   return (
     <div className="animate-fade-in">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Empleados</h1>
-        <Button onClick={() => navigate("/empleados/nuevo")}>
+        <h1 className="text-3xl font-bold aurora-text">Empleados</h1>
+        <Button 
+          onClick={() => navigate("/empleados/nuevo")}
+          className="bg-aurora-blue hover:bg-blue-600 text-white"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Añadir Empleado
         </Button>
       </div>
 
       {loading ? (
-        <p>Cargando empleados...</p>
+        <div className="aurora-glass p-8 flex justify-center items-center">
+          <p className="text-white">Cargando empleados...</p>
+        </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-800">
+        <div className="overflow-x-auto aurora-glass p-3 rounded-lg">
+          <table className="min-w-full divide-y divide-white/10">
+            <thead className="bg-black/20">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   Nombre
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   Puesto
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   Departamento
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   Salario
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-white/70 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y divide-white/10">
               {empleados.map((empleado) => (
-                <tr key={empleado.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <tr key={empleado.id} className="hover:bg-white/5">
+                  <td className="px-6 py-4 whitespace-nowrap text-white">
                     {empleado.nombre} {empleado.apellido}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">{empleado.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{empleado.puesto}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{empleado.departamento}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {empleado.salario ? `€${empleado.salario}` : "N/A"}
+                  <td className="px-6 py-4 whitespace-nowrap text-white/80">{empleado.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-white/80">{empleado.puesto}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-white/80">{empleado.departamento}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-white/80">
+                    <div className="flex items-center">
+                      {empleado.moneda === "USD" ? (
+                        <DollarSign className="h-4 w-4 mr-1 text-green-400" />
+                      ) : (
+                        <EuroIcon className="h-4 w-4 mr-1 text-blue-400" />
+                      )}
+                      {formatoSalario(empleado)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => navigate(`/empleados/editar/${empleado.id}`)}
+                      className="text-white/70 hover:text-white hover:bg-white/10"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -141,6 +168,7 @@ const EmpleadosList = () => {
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(empleado.id)}
+                      className="text-white/70 hover:text-white hover:bg-white/10"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
