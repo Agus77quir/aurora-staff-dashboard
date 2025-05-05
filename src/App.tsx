@@ -4,11 +4,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Empleados from "./pages/Empleados";
 import NuevoEmpleado from "./pages/NuevoEmpleado";
 import EditarEmpleado from "./pages/EditarEmpleado";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -18,13 +21,44 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/empleados" element={<Empleados />} />
-          <Route path="/empleados/nuevo" element={<NuevoEmpleado />} />
-          <Route path="/empleados/editar/:id" element={<EditarEmpleado />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route 
+              path="/" 
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/empleados" 
+              element={
+                <ProtectedRoute>
+                  <Empleados />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/empleados/nuevo" 
+              element={
+                <ProtectedRoute>
+                  <NuevoEmpleado />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/empleados/editar/:id" 
+              element={
+                <ProtectedRoute>
+                  <EditarEmpleado />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

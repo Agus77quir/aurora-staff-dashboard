@@ -9,7 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      empleados: {
+        Row: {
+          apellido: string
+          created_at: string
+          departamento: string
+          email: string
+          fecha_contratacion: string
+          id: string
+          nombre: string
+          puesto: string
+          salario: number | null
+          telefono: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          apellido: string
+          created_at?: string
+          departamento: string
+          email: string
+          fecha_contratacion: string
+          id?: string
+          nombre: string
+          puesto: string
+          salario?: number | null
+          telefono?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          apellido?: string
+          created_at?: string
+          departamento?: string
+          email?: string
+          fecha_contratacion?: string
+          id?: string
+          nombre?: string
+          puesto?: string
+          salario?: number | null
+          telefono?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      perfiles: {
+        Row: {
+          apellido: string | null
+          created_at: string
+          id: string
+          nombre: string | null
+          rol: string | null
+        }
+        Insert: {
+          apellido?: string | null
+          created_at?: string
+          id: string
+          nombre?: string | null
+          rol?: string | null
+        }
+        Update: {
+          apellido?: string | null
+          created_at?: string
+          id?: string
+          nombre?: string | null
+          rol?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

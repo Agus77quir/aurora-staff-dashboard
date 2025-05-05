@@ -5,60 +5,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface EmpleadoFormProps {
   tipo: "crear" | "editar";
 }
 
 interface Empleado {
-  id: string;
+  id?: string;
   nombre: string;
   apellido: string;
   email: string;
   puesto: string;
   departamento: string;
-  fechaContratacion: string;
-  salario: string;
-  telefono: string;
+  fecha_contratacion: string;
+  salario?: string;
+  telefono?: string;
+  user_id?: string;
 }
 
 const empleadoInicial: Empleado = {
-  id: "",
   nombre: "",
   apellido: "",
   email: "",
   puesto: "",
   departamento: "",
-  fechaContratacion: new Date().toISOString().split("T")[0],
+  fecha_contratacion: new Date().toISOString().split("T")[0],
   salario: "",
   telefono: "",
-};
-
-// Datos de ejemplo para editar
-const empleadosEjemplo: Record<string, Empleado> = {
-  "1": {
-    id: "1",
-    nombre: "Carlos",
-    apellido: "Rodríguez",
-    email: "carlos@aurorarrhh.com",
-    puesto: "Desarrollador Frontend",
-    departamento: "Tecnología",
-    fechaContratacion: "2023-01-15",
-    salario: "45000",
-    telefono: "123456789",
-  },
-  "2": {
-    id: "2",
-    nombre: "María",
-    apellido: "González",
-    email: "maria@aurorarrhh.com",
-    puesto: "Diseñadora UX/UI",
-    departamento: "Diseño",
-    fechaContratacion: "2023-02-20",
-    salario: "48000",
-    telefono: "987654321",
-  },
 };
 
 const departamentos = [
@@ -77,25 +53,47 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
-  const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     // Si es modo edición y tenemos un ID, cargamos los datos del empleado
     if (tipo === "editar" && id) {
-      // Aquí se implementará la carga desde Supabase
-      // Por ahora usamos datos de ejemplo
-      if (empleadosEjemplo[id]) {
-        setEmpleado(empleadosEjemplo[id]);
-      } else {
-        toast({
-          title: "Error",
-          description: "Empleado no encontrado",
-          variant: "destructive",
-        });
-        navigate("/empleados");
-      }
+      const fetchEmpleado = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('empleados')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (error) {
+            throw error;
+          }
+          
+          if (data) {
+            setEmpleado(data);
+          } else {
+            toast({
+              title: "Error",
+              description: "Empleado no encontrado",
+              variant: "destructive",
+            });
+            navigate("/empleados");
+          }
+        } catch (error: any) {
+          console.error("Error al cargar empleado:", error);
+          toast({
+            title: "Error",
+            description: `Error al cargar empleado: ${error.message}`,
+            variant: "destructive",
+          });
+          navigate("/empleados");
+        }
+      };
+
+      fetchEmpleado();
     }
-  }, [tipo, id, navigate, toast]);
+  }, [tipo, id, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -112,10 +110,45 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "Debe iniciar sesión para realizar esta acción",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Aquí se implementará la lógica para guardar en Supabase
-      // Por ahora solo simulamos una operación exitosa
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      let result;
+      
+      if (tipo === "crear") {
+        // Crear nuevo empleado
+        result = await supabase
+          .from('empleados')
+          .insert({
+            ...empleado,
+            user_id: user.id,
+            fecha_contratacion: empleado.fecha_contratacion,
+            salario: empleado.salario ? parseFloat(empleado.salario) : null
+          });
+      } else {
+        // Actualizar empleado existente
+        result = await supabase
+          .from('empleados')
+          .update({
+            ...empleado,
+            fecha_contratacion: empleado.fecha_contratacion,
+            salario: empleado.salario ? parseFloat(empleado.salario) : null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id);
+      }
+      
+      if (result.error) {
+        throw result.error;
+      }
 
       toast({
         title: tipo === "crear" ? "Empleado creado" : "Empleado actualizado",
@@ -125,11 +158,11 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
       });
 
       navigate("/empleados");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
       toast({
         title: "Error",
-        description: "Ha ocurrido un error al procesar la solicitud.",
+        description: `Ha ocurrido un error: ${error.message}`,
         variant: "destructive",
       });
     } finally {
@@ -185,7 +218,7 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
           <Input
             id="telefono"
             name="telefono"
-            value={empleado.telefono}
+            value={empleado.telefono || ""}
             onChange={handleChange}
             className="mt-1"
             placeholder="Número de teléfono"
@@ -225,12 +258,12 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
         </div>
 
         <div>
-          <Label htmlFor="fechaContratacion">Fecha de contratación</Label>
+          <Label htmlFor="fecha_contratacion">Fecha de contratación</Label>
           <Input
-            id="fechaContratacion"
-            name="fechaContratacion"
+            id="fecha_contratacion"
+            name="fecha_contratacion"
             type="date"
-            value={empleado.fechaContratacion}
+            value={empleado.fecha_contratacion}
             onChange={handleChange}
             required
             className="mt-1"
@@ -243,7 +276,7 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
             id="salario"
             name="salario"
             type="number"
-            value={empleado.salario}
+            value={empleado.salario || ""}
             onChange={handleChange}
             className="mt-1"
             placeholder="Salario anual"

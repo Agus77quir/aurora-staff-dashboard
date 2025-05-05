@@ -1,7 +1,10 @@
 
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { BarChart, User, Home, Plus, Users, Settings } from "lucide-react";
+import { BarChart, User, Home, Plus, Users, Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import UserProfileButton from "@/components/auth/UserProfileButton";
+import { Button } from "@/components/ui/button";
 
 interface SidebarProps {
   open: boolean;
@@ -9,6 +12,8 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ open, toggleSidebar }: SidebarProps) => {
+  const { user, signOut } = useAuth();
+  
   return (
     <aside
       className={`fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out ${
@@ -130,16 +135,32 @@ export const Sidebar = ({ open, toggleSidebar }: SidebarProps) => {
         <div className="mb-4 px-2">
           <div className={`rounded-lg ${open ? "p-4" : "p-2"} bg-sidebar-accent`}>
             {open ? (
-              <div>
-                <p className="text-sm font-medium text-sidebar-accent-foreground">
-                  Sesión iniciada como
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  admin@aurorarrhh.com
-                </p>
-              </div>
+              user ? (
+                <div>
+                  <p className="text-sm font-medium text-sidebar-accent-foreground truncate">
+                    {user.email}
+                  </p>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => signOut()}
+                    className="mt-2 w-full"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" /> Salir
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => window.location.href = '/auth'}
+                >
+                  <User className="h-4 w-4 mr-2" /> Iniciar sesión
+                </Button>
+              )
             ) : (
-              <User className="h-5 w-5 mx-auto" />
+              <UserProfileButton />
             )}
           </div>
         </div>

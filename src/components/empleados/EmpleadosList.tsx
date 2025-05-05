@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   Table, 
@@ -11,6 +11,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface Empleado {
   id: string;
@@ -19,48 +23,61 @@ interface Empleado {
   email: string;
   puesto: string;
   departamento: string;
-  fechaContratacion: string;
+  fecha_contratacion: string;
+  salario?: string;
+  telefono?: string;
+  user_id?: string;
 }
 
-// Datos de ejemplo para mostrar, serán reemplazados por datos de Supabase
-const empleadosEjemplo: Empleado[] = [
-  {
-    id: "1",
-    nombre: "Carlos",
-    apellido: "Rodríguez",
-    email: "carlos@aurorarrhh.com",
-    puesto: "Desarrollador Frontend",
-    departamento: "Tecnología",
-    fechaContratacion: "2023-01-15",
-  },
-  {
-    id: "2",
-    nombre: "María",
-    apellido: "González",
-    email: "maria@aurorarrhh.com",
-    puesto: "Diseñadora UX/UI",
-    departamento: "Diseño",
-    fechaContratacion: "2023-02-20",
-  },
-  {
-    id: "3",
-    nombre: "Juan",
-    apellido: "Pérez",
-    email: "juan@aurorarrhh.com",
-    puesto: "Gerente de Proyecto",
-    departamento: "Administración",
-    fechaContratacion: "2022-11-05",
-  },
-];
-
 const EmpleadosList = () => {
-  const [empleados, setEmpleados] = React.useState<Empleado[]>(empleadosEjemplo);
-  const [busqueda, setBusqueda] = React.useState("");
+  const [empleados, setEmpleados] = useState<Empleado[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [busqueda, setBusqueda] = useState("");
+  const { user } = useAuth();
 
-  const handleDelete = (id: string) => {
-    // Aquí se implementará la eliminación con Supabase
-    // Por ahora solo filtramos la lista de empleados local
-    setEmpleados(empleados.filter((empleado) => empleado.id !== id));
+  useEffect(() => {
+    const fetchEmpleados = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('empleados')
+          .select('*')
+          .order('apellido', { ascending: true });
+        
+        if (error) {
+          throw error;
+        }
+        
+        setEmpleados(data || []);
+      } catch (error: any) {
+        toast.error(`Error al cargar empleados: ${error.message}`);
+        console.error("Error al cargar empleados:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEmpleados();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este empleado?")) {
+      try {
+        const { error } = await supabase
+          .from('empleados')
+          .delete()
+          .eq('id', id);
+        
+        if (error) {
+          throw error;
+        }
+        
+        setEmpleados(empleados.filter((empleado) => empleado.id !== id));
+        toast.success("Empleado eliminado correctamente");
+      } catch (error: any) {
+        toast.error(`Error al eliminar empleado: ${error.message}`);
+        console.error("Error al eliminar empleado:", error);
+      }
+    }
   };
 
   const empleadosFiltrados = empleados.filter(
@@ -72,12 +89,20 @@ const EmpleadosList = () => {
       empleado.departamento.toLowerCase().includes(busqueda.toLowerCase())
   );
 
+  if (isLoading) {
+    return (
+      <div className="glass-card p-8 flex justify-center items-center">
+        <div className="animate-pulse">Cargando empleados...</div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <h2 className="text-2xl font-bold">Lista de Empleados</h2>
         <div className="flex items-center gap-2">
-          <input
+          <Input
             type="text"
             placeholder="Buscar empleados..."
             value={busqueda}
@@ -124,7 +149,7 @@ const EmpleadosList = () => {
                     {empleado.departamento}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    {new Date(empleado.fechaContratacion).toLocaleDateString("es-ES")}
+                    {new Date(empleado.fecha_contratacion).toLocaleDateString("es-ES")}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -137,6 +162,7 @@ const EmpleadosList = () => {
                         variant="destructive"
                         size="sm"
                         onClick={() => handleDelete(empleado.id)}
+                        disabled={empleado.user_id !== user?.id}
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
