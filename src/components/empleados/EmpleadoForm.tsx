@@ -318,7 +318,7 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
             <Label className="text-white/90 mb-2 block">Tipo de salario</Label>
             <RadioGroup 
               value={empleado.tipo_salario} 
-              onValueChange={(value) => handleSelectChange("tipo_salario", value)}
+              onValueChange={(value) => handleSelectChange("tipo_salario", value as "mensual" | "anual")}
               className="flex space-x-4"
             >
               <div className="flex items-center space-x-2">
@@ -336,13 +336,13 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
             <Label className="text-white/90 mb-2 block">Moneda</Label>
             <RadioGroup 
               value={empleado.moneda} 
-              onValueChange={(value) => handleSelectChange("moneda", value)}
+              onValueChange={(value) => handleSelectChange("moneda", value as "ARS" | "USD")}
               className="flex space-x-4"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="ARS" id="peso" />
                 <Label htmlFor="peso" className="text-white/90 flex items-center">
-                  <EuroIcon className="h-4 w-4 mr-1" /> Peso Argentino
+                  ARS $
                 </Label>
               </div>
               <div className="flex items-center space-x-2">

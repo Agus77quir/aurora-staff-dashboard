@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Trash2, DollarSign, EuroIcon } from "lucide-react";
+import { Plus, Edit, Trash2, DollarSign } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -150,7 +150,7 @@ const EmpleadosList = () => {
                       {empleado.moneda === "USD" ? (
                         <DollarSign className="h-4 w-4 mr-1 text-green-400" />
                       ) : (
-                        <EuroIcon className="h-4 w-4 mr-1 text-blue-400" />
+                        <span className="mr-1 text-blue-400">ARS</span>
                       )}
                       {formatoSalario(empleado)}
                     </div>

@@ -17,10 +17,12 @@ export type Database = {
           email: string
           fecha_contratacion: string
           id: string
+          moneda: string | null
           nombre: string
           puesto: string
           salario: number | null
           telefono: string | null
+          tipo_salario: string | null
           updated_at: string
           user_id: string | null
         }
@@ -31,10 +33,12 @@ export type Database = {
           email: string
           fecha_contratacion: string
           id?: string
+          moneda?: string | null
           nombre: string
           puesto: string
           salario?: number | null
           telefono?: string | null
+          tipo_salario?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -45,10 +49,12 @@ export type Database = {
           email?: string
           fecha_contratacion?: string
           id?: string
+          moneda?: string | null
           nombre?: string
           puesto?: string
           salario?: number | null
           telefono?: string | null
+          tipo_salario?: string | null
           updated_at?: string
           user_id?: string | null
         }
