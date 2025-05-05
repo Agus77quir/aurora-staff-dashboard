@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -71,21 +70,22 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
           }
           
           if (data) {
-            setEmpleado(data);
+            // Convertimos los datos del empleado al tipo Empleado
+            const empleadoData: Empleado = {
+              ...data,
+              salario: data.salario?.toString() || "",
+            };
+            setEmpleado(empleadoData);
           } else {
-            toast({
-              title: "Error",
+            toast("Error", {
               description: "Empleado no encontrado",
-              variant: "destructive",
             });
             navigate("/empleados");
           }
         } catch (error: any) {
           console.error("Error al cargar empleado:", error);
-          toast({
-            title: "Error",
+          toast("Error", {
             description: `Error al cargar empleado: ${error.message}`,
-            variant: "destructive",
           });
           navigate("/empleados");
         }
@@ -111,10 +111,8 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
     setIsSubmitting(true);
 
     if (!user) {
-      toast({
-        title: "Error",
+      toast("Error", {
         description: "Debe iniciar sesión para realizar esta acción",
-        variant: "destructive",
       });
       setIsSubmitting(false);
       return;
@@ -150,8 +148,7 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
         throw result.error;
       }
 
-      toast({
-        title: tipo === "crear" ? "Empleado creado" : "Empleado actualizado",
+      toast(tipo === "crear" ? "Empleado creado" : "Empleado actualizado", {
         description: `${empleado.nombre} ${empleado.apellido} ha sido ${
           tipo === "crear" ? "añadido" : "actualizado"
         } correctamente.`,
@@ -160,10 +157,8 @@ const EmpleadoForm: React.FC<EmpleadoFormProps> = ({ tipo }) => {
       navigate("/empleados");
     } catch (error: any) {
       console.error("Error:", error);
-      toast({
-        title: "Error",
+      toast("Error", {
         description: `Ha ocurrido un error: ${error.message}`,
-        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
